@@ -33,7 +33,7 @@
 	<PropertyGroup>
 		<PackageReleaseNotes></PackageReleaseNotes>
 		<SignAssembly>True</SignAssembly>
-		<AssemblyOriginatorKeyFile>..\..\Koala.snk</AssemblyOriginatorKeyFile>
+		<AssemblyOriginatorKeyFile>..\..\Koala.Serialization.snk</AssemblyOriginatorKeyFile>
 	</PropertyGroup>
 
 	<ItemGroup>
