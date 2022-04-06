@@ -7,7 +7,7 @@ on:
     branches: [ main ]
 
 jobs:
-  build:
+  prepare:
 
     runs-on: ubuntu-latest
 
@@ -17,15 +17,33 @@ jobs:
       uses: actions/setup-dotnet@v2
       with:
         dotnet-version: 6.0.x
+    
+  build-pack:
+
+    runs-on: ubuntu-latest
+
+    steps:
     - name: Restore Dependencies
       run: dotnet restore
     - name: Build
       run: dotnet build -c Release Koala.Serialization.sln
     - name: Pack
       run: dotnet pack -c Release Koala.Serialization.sln -o ./packages
+    
+  check:
+
+    runs-on: ubuntu-latest
+
+    steps:
     - name: List Packages
       run: ls ./packages
     - name: Check NuGet Version
       run: dotnet nuget --version
+    
+  publish:
+
+    runs-on: ubuntu-latest
+
+    steps:
     - name: Push NuGet
       run: dotnet nuget push ./packages/*.nupkg --api-key oy2hpalsnejf2tce7x3aimoei2bruszuxllqu744n7jwqa --source https://api.nuget.org/v3/index.json
