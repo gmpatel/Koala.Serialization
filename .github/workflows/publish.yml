@@ -6,8 +6,8 @@ on:
     - 'v*'
 
 env:
-  SOLUTION_PATH: './Koala.Serialization.sln'
-  OUTPUT_DIR_PATH: './packages'
+  SOLUTION_PATH: 'Koala.Serialization.sln'
+  OUTPUT_DIR_PATH: 'packages'
   NUGET_API_KEY: ${{ secrets.NUGET_API_KEY_GMPATEL }}
   NUGET_SOURCE: 'https://api.nuget.org/v3/index.json'
   
