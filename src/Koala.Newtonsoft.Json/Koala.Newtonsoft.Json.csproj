@@ -1,0 +1,58 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>netstandard2.0</TargetFramework>
+		<Platforms>x64;AnyCPU</Platforms>
+		<ApplicationIcon />
+		<OutputType>Library</OutputType>
+		<StartupObject />
+		<AssemblyName>Koala.Newtonsoft.Json</AssemblyName>
+		<RootNamespace>Newtonsoft.Json</RootNamespace>
+		<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+
+		<VersionSuffix>$([System.Convert]::ToUInt16($([MSBuild]::Divide($([System.DateTime]::Now.ToString(yy)), 10)))).$([System.Convert]::ToUInt16($([MSBuild]::Modulo($([System.DateTime]::Now.ToString(yy)), 10)))).$([System.DateTime]::Now.ToString(MM)).$([System.DateTime]::Now.ToString(ddHH))</VersionSuffix>
+		<AssemblyVersion Condition=" '$(Configuration)' == 'Debug' ">1.0.0.0</AssemblyVersion>
+		<AssemblyVersion Condition=" '$(Configuration)' != 'Debug' ">$(VersionSuffix)</AssemblyVersion>
+		<Version Condition=" '$(Configuration)' == 'Debug' ">1.0.0.0</Version>
+		<Version Condition=" '$(Configuration)' != 'Debug' ">$(VersionSuffix)</Version>
+		<FileVersion Condition=" '$(Configuration)' == 'Debug' ">1.0.0.0</FileVersion>
+		<FileVersion Condition=" '$(Configuration)' != 'Debug' ">$(VersionSuffix)</FileVersion>
+		<RunPostBuildEvent>Always</RunPostBuildEvent>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+		<TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+		<WarningsAsErrors />
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+		<TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+		<WarningsAsErrors />
+	</PropertyGroup>
+
+	<PropertyGroup>
+		<PackageReleaseNotes></PackageReleaseNotes>
+		<SignAssembly>True</SignAssembly>
+		<AssemblyOriginatorKeyFile>..\..\Koala.snk</AssemblyOriginatorKeyFile>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Compile Update="Properties\Resources.Designer.cs">
+			<DesignTime>True</DesignTime>
+			<AutoGen>True</AutoGen>
+			<DependentUpon>Resources.resx</DependentUpon>
+		</Compile>
+	</ItemGroup>
+
+	<ItemGroup>
+		<EmbeddedResource Update="Properties\Resources.resx">
+			<Generator>ResXFileCodeGenerator</Generator>
+			<LastGenOutput>Resources.Designer.cs</LastGenOutput>
+		</EmbeddedResource>
+	</ItemGroup>
+
+</Project>

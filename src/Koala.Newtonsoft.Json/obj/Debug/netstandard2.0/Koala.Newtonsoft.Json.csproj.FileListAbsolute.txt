@@ -1,0 +1,14 @@
+D:\Code\Koala.Serialization\src\Koala.Newtonsoft.Json\bin\Debug\netstandard2.0\Koala.Newtonsoft.Json.deps.json
+D:\Code\Koala.Serialization\src\Koala.Newtonsoft.Json\bin\Debug\netstandard2.0\Koala.Newtonsoft.Json.dll
+D:\Code\Koala.Serialization\src\Koala.Newtonsoft.Json\bin\Debug\netstandard2.0\Koala.Newtonsoft.Json.pdb
+D:\Code\Koala.Serialization\src\Koala.Newtonsoft.Json\bin\Debug\netstandard2.0\Newtonsoft.Json.dll
+D:\Code\Koala.Serialization\src\Koala.Newtonsoft.Json\obj\Debug\netstandard2.0\Koala.Newtonsoft.Json.csproj.AssemblyReference.cache
+D:\Code\Koala.Serialization\src\Koala.Newtonsoft.Json\obj\Debug\netstandard2.0\Newtonsoft.Json.Properties.Resources.resources
+D:\Code\Koala.Serialization\src\Koala.Newtonsoft.Json\obj\Debug\netstandard2.0\Koala.Newtonsoft.Json.csproj.GenerateResource.cache
+D:\Code\Koala.Serialization\src\Koala.Newtonsoft.Json\obj\Debug\netstandard2.0\Koala.Newtonsoft.Json.GeneratedMSBuildEditorConfig.editorconfig
+D:\Code\Koala.Serialization\src\Koala.Newtonsoft.Json\obj\Debug\netstandard2.0\Koala.Newtonsoft.Json.AssemblyInfoInputs.cache
+D:\Code\Koala.Serialization\src\Koala.Newtonsoft.Json\obj\Debug\netstandard2.0\Koala.Newtonsoft.Json.AssemblyInfo.cs
+D:\Code\Koala.Serialization\src\Koala.Newtonsoft.Json\obj\Debug\netstandard2.0\Koala.Newtonsoft.Json.csproj.CoreCompileInputs.cache
+D:\Code\Koala.Serialization\src\Koala.Newtonsoft.Json\obj\Debug\netstandard2.0\Koala.Newtonsoft.Json.csproj.CopyComplete
+D:\Code\Koala.Serialization\src\Koala.Newtonsoft.Json\obj\Debug\netstandard2.0\Koala.Newtonsoft.Json.dll
+D:\Code\Koala.Serialization\src\Koala.Newtonsoft.Json\obj\Debug\netstandard2.0\Koala.Newtonsoft.Json.pdb

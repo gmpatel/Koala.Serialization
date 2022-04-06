@@ -1,0 +1,3 @@
+is_global = true
+build_property.RootNamespace = Newtonsoft.Json
+build_property.ProjectDir = D:\Code\Koala.Serialization\src\Koala.Serialization\
