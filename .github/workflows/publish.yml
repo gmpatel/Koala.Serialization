@@ -36,7 +36,7 @@ jobs:
 
     - name: 'Get Version'
       id: version
-      uses: battilay/get-version-action@v2
+      uses: battila7/get-version-action@v2
 
     - name: 'Print Version'
       run: echo steps.version.outputs.version-without-v
