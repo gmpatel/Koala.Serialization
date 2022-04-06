@@ -8,7 +8,7 @@ on:
     branches: [ main ]
 
 env:
-  SOLUTION_PATH: 'Koala.Serialization.sln'
+  SOLUTION_PATH: './Koala.Serialization.sln'
 
 jobs:
   build-test:
@@ -28,7 +28,7 @@ jobs:
       run: dotnet restore
 
     - name: 'Build Solution'
-      run: dotnet build ${{ SOLUTION_PATH }} --configuration Release --no-restore 
+      run: dotnet build ${{ env.SOLUTION_PATH }} --configuration Release --no-restore 
 
     - name: 'Run UnitTests'
-      run: dotnet test ${{ SOLUTION_PATH }} --configuration Release --no-restore --no-build 
+      run: dotnet test ${{ env.SOLUTION_PATH }} --configuration Release --no-restore --no-build 
