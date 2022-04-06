@@ -18,6 +18,20 @@
 		<FileVersion Condition=" '$(Configuration)' == 'Debug' ">1.0.0.0</FileVersion>
 		<FileVersion Condition=" '$(Configuration)' != 'Debug' ">$(VersionSuffix)</FileVersion>
 		<RunPostBuildEvent>Always</RunPostBuildEvent>
+
+		<GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+		<PackageIcon>koala-logo-350px.png</PackageIcon>
+		<Copyright>Copyright © 2022-32</Copyright>
+		<PackageProjectUrl>https://github.com/gmpatel/Koala.Serialization</PackageProjectUrl>
+		<RepositoryUrl>https://github.com/gmpatel/Koala.Serialization</RepositoryUrl>
+		<RepositoryType>git</RepositoryType>
+		<PackageTags>Newtonsoft.Json Newtonsoft Extensions Wrapper Serialization ObjectClone Json</PackageTags>
+		<NeutralLanguage>en</NeutralLanguage>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
+		<Description>Koala.Serialization is a library contains extensions to take maximum out of Newtonsoft Json</Description>
+		<Authors>Patel Gunjan [GP], $(AssemblyName)</Authors>
+		<Company>Patel Gunjan [GP], $(AssemblyName)</Company>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -53,6 +67,20 @@
 			<Generator>ResXFileCodeGenerator</Generator>
 			<LastGenOutput>Resources.Designer.cs</LastGenOutput>
 		</EmbeddedResource>
+	</ItemGroup>
+
+	<ItemGroup>
+		<None Include="../../koala-logo-350px.png">
+			<Pack>True</Pack>
+			<PackagePath>\</PackagePath>
+		</None>
+	</ItemGroup>
+
+	<ItemGroup>
+		<None Include="../../README.md">
+			<Pack>True</Pack>
+			<PackagePath>\</PackagePath>
+		</None>
 	</ItemGroup>
 
 </Project>

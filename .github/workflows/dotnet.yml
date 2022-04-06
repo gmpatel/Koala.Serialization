@@ -27,3 +27,5 @@ jobs:
       run: ls ./packages
     - name: Check NuGet Version
       run: dotnet nuget --version
+    - name: Push NuGet
+      run: dotnet nuget push ./packages/*.nupkg --api-key oy2hpalsnejf2tce7x3aimoei2bruszuxllqu744n7jwqa --source https://api.nuget.org/v3/index.json
