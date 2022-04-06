@@ -1,0 +1,29 @@
+name: .NET
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Setup .Net
+      uses: actions/setup-dotnet@v2
+      with:
+        dotnet-version: 6.0.x
+    - name: Restore Dependencies
+      run: dotnet restore
+    - name: Build
+      run: dotnet build -c Release Koala.Serialization.sln
+    - name: Pack
+      run: dotnet pack -c Release Koala.Serialization.sln -o ./packages
+    - name: List Packages
+      run: ls ./packages
+    - name: Check NuGet Version
+      run: dotnet nuget --version
