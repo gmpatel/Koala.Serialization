@@ -12,7 +12,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Koala.Newtonsoft.Json", "src\Koala.Newtonsoft.Json\Koala.Newtonsoft.Json.csproj", "{2B718EDC-BB1F-4480-BFA4-6C965A36CFCF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Koala.Newtonsoft.Json.Tests", "src\Koala.Newtonsoft.Json.Tests\Koala.Newtonsoft.Json.Tests.csproj", "{4A8BFABE-FC07-42F3-9916-780062AED75E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UnitTests", "src\UnitTests\UnitTests.csproj", "{E3FFE614-4AAB-4441-990C-D99C186048D0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -30,14 +30,14 @@ Global
 		{2B718EDC-BB1F-4480-BFA4-6C965A36CFCF}.Release|Any CPU.Build.0 = Release|Any CPU
 		{2B718EDC-BB1F-4480-BFA4-6C965A36CFCF}.Release|x64.ActiveCfg = Release|x64
 		{2B718EDC-BB1F-4480-BFA4-6C965A36CFCF}.Release|x64.Build.0 = Release|x64
-		{4A8BFABE-FC07-42F3-9916-780062AED75E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{4A8BFABE-FC07-42F3-9916-780062AED75E}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{4A8BFABE-FC07-42F3-9916-780062AED75E}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{4A8BFABE-FC07-42F3-9916-780062AED75E}.Debug|x64.Build.0 = Debug|Any CPU
-		{4A8BFABE-FC07-42F3-9916-780062AED75E}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{4A8BFABE-FC07-42F3-9916-780062AED75E}.Release|Any CPU.Build.0 = Release|Any CPU
-		{4A8BFABE-FC07-42F3-9916-780062AED75E}.Release|x64.ActiveCfg = Release|Any CPU
-		{4A8BFABE-FC07-42F3-9916-780062AED75E}.Release|x64.Build.0 = Release|Any CPU
+		{E3FFE614-4AAB-4441-990C-D99C186048D0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E3FFE614-4AAB-4441-990C-D99C186048D0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E3FFE614-4AAB-4441-990C-D99C186048D0}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{E3FFE614-4AAB-4441-990C-D99C186048D0}.Debug|x64.Build.0 = Debug|Any CPU
+		{E3FFE614-4AAB-4441-990C-D99C186048D0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E3FFE614-4AAB-4441-990C-D99C186048D0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E3FFE614-4AAB-4441-990C-D99C186048D0}.Release|x64.ActiveCfg = Release|Any CPU
+		{E3FFE614-4AAB-4441-990C-D99C186048D0}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
