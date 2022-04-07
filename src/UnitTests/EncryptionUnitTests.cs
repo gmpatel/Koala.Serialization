@@ -25,6 +25,8 @@ namespace UnitTests
             var dataCompress = data.Compress();
 
             var data2 = dataCompress.Uncompress<string>();
+
+            Assert.Pass();
         }
     }
 
