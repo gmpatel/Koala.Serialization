@@ -78,6 +78,12 @@ namespace Koala.Core
             return variableValue;
         }
 
+        public static string SetEnvVarValue(this string variableName, string variableValue, EnvironmentVariableTarget environmentTarget = EnvironmentVariableTarget.Process)
+        {
+            Environment.SetEnvironmentVariable(variableName, variableValue, environmentTarget);
+            return variableValue;
+        }
+
         public static T GetValueAs<T>(this IDictionary<string, object> data, string key)
         {
             if (data != null && data.TryGetValue(key, out var value))

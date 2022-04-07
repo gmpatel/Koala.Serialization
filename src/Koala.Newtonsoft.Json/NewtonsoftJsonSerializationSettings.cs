@@ -2,17 +2,34 @@
 using Newtonsoft.Json.Converters;
 using System.Collections.Generic;
 using Newtonsoft.Json.Serialization;
+using System.Linq;
 
 namespace Newtonsoft.Json
 {
     public static class NewtonsoftJsonSerializationSettings
     {
+        public static readonly IDictionary<string, JsonConverter> Converters;
+
         private static JsonSerializerSettings jsonDotNetFwNotIndentedSettings { get; set; }
         private static JsonSerializerSettings jsonIndentedSettings { get; set; }
         private static JsonSerializerSettings jsonNotIndentedSettings { get; set; }
         private static JsonSerializerSettings jsonIncludeAllPropertiesNonIndentedSettings { get; set; }
         private static JsonSerializerSettings jsonIncludeAllPropertiesIndentedSettings { get; set; }
-                                    
+
+        static NewtonsoftJsonSerializationSettings()
+        {
+            Converters = new Dictionary<string, JsonConverter> 
+            {
+                { typeof(StringEnumConverter).Name, new StringEnumConverter { AllowIntegerValues = true } }
+            };
+        }
+
+        public static void RegistreJsonConverter(this JsonConverter converter)
+        {
+            Converters[converter.GetType().Name] = converter;
+            jsonIndentedSettings = null;
+        }
+
         public static JsonSerializerSettings ApplicationNewtonsoftJsonSettings
         {
             get
@@ -22,7 +39,7 @@ namespace Newtonsoft.Json
                     jsonIndentedSettings = new JsonSerializerSettings
                     {
                         ContractResolver = new CamelCaseExceptDictionaryKeysResolver(),
-                        Converters = new List<JsonConverter> { new StringEnumConverter { AllowIntegerValues = true } },
+                        Converters = Converters.Select(x => x.Value).ToList(),
                         NullValueHandling = NullValueHandling.Ignore,
                         DefaultValueHandling = DefaultValueHandling.Ignore,
                         ReferenceLoopHandling = ReferenceLoopHandling.Ignore,

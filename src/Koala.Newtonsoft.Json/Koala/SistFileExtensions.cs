@@ -48,7 +48,7 @@ namespace Koala.Core
                 Directory.CreateDirectory(rootDirectoryInfo.FullName);
             }
 
-            var dumpDirectoryName = appId != default ? $"dump-{appId.ToString().ToLower()}" : $"dump-{AppId.ToString().ToLower()}";
+            var dumpDirectoryName = appId != default ? $"dump-{appId.ToString().ToLower()}" : $"dump-{DynamicAppId.ToString().ToLower()}";
 
             var dumpDirectoryInfo = new DirectoryInfo(Path.Combine(rootDirectoryInfo.FullName, dumpDirectoryName));
 
@@ -62,6 +62,6 @@ namespace Koala.Core
 
         private static readonly object GetFromFileLock = new object();
 
-        private static readonly Guid AppId = Guid.NewGuid();
+        private static readonly Guid DynamicAppId = Guid.NewGuid();
     }
 }
