@@ -1,5 +1,4 @@
 ﻿using System;
-using Newtonsoft.Json;
 using Newtonsoft.Json.Properties;
 using Newtonsoft.Json.Encryption;
 using Newtonsoft.Json.DataExtensions;
@@ -109,7 +108,7 @@ namespace Newtonsoft.Json
         {
             var jsonString = input.Json(applySettings);
             var jsonStringZippedBytes = jsonString.Zip();
-            var jsonStringZippedBytesBase64String = Convert.ToBase64String(jsonStringZippedBytes);
+            var jsonStringZippedBytesBase64String = jsonStringZippedBytes.Base64Encode();
             return jsonStringZippedBytesBase64String;
         }
 
@@ -128,34 +127,40 @@ namespace Newtonsoft.Json
 
         public static T Uncompress<T>(this string input, bool? applySettings = default, bool? dotNetCore = default)
         {
-            var jsonStringZippedBytesBack = Convert.FromBase64String(input);
+            var jsonStringZippedBytesBack = input.Base64DecodeAsBytes();
             var jsonStringBack = jsonStringZippedBytesBack.Unzip();
             var output = jsonStringBack.Get<T>(applySettings, dotNetCore);
             return output;
         }
-
-        public static string EncryptToString<T>(this T input, bool applySettings = true)
-        {
-            var encryptedBytes = Encrypt(input, applySettings);
-            return encryptedBytes.Base64Encode();
-        }
         
-        public static byte[] Encrypt<T>(this T input, bool applySettings = true)
+        public static string Encrypt<T>(this T input, bool applySettings = true)
         {
             var jsonString = input.Json(applySettings);
-            var jsonStringZippedBytes = jsonString.Zip();
-            return Cryptography.Encrypt(jsonStringZippedBytes);
+            var encryptedBytes = Cryptography.Encrypt(jsonString);
+            return encryptedBytes.Base64Encode();
         }
 
         public static T Decrypt<T>(this string input, bool? applySettings = default, bool? dotNetCore = default)
         {
-            var encryptedBytes = Encoding.ASCII.GetBytes(input);
-            return Decrypt<T>(encryptedBytes, applySettings, dotNetCore);
+            var encryptedBytes = input.Base64DecodeAsBytes();
+            var decryptedBytes = Cryptography.Decrypt(encryptedBytes);
+            var jsonStringBack = Encoding.ASCII.GetString(decryptedBytes);
+            var output = jsonStringBack.Get<T>(applySettings, dotNetCore);
+            return output;
         }
 
-        public static T Decrypt<T>(this byte[] input, bool? applySettings = default, bool? dotNetCore = default)
+        public static string CompressPlus<T>(this T input, bool applySettings = true)
         {
-            var decryptedBytes = input.Decrypt();
+            var jsonString = input.Json(applySettings);
+            var jsonStringZippedBytes = jsonString.Zip();
+            var encryptedBytes = Cryptography.Encrypt(jsonStringZippedBytes);
+            return encryptedBytes.Base64Encode();
+        }
+
+        public static T UncompressPlus<T>(this string input, bool? applySettings = default, bool? dotNetCore = default)
+        {
+            var encryptedBytes = input.Base64DecodeAsBytes();
+            var decryptedBytes = Cryptography.Decrypt(encryptedBytes);
             var jsonStringBack = decryptedBytes.Unzip();
             var output = jsonStringBack.Get<T>(applySettings, dotNetCore);
             return output;

@@ -38,9 +38,14 @@ namespace Newtonsoft.Json.DataExtensions
 
         public static string Base64Decode(this string base64EncodedString)
         {
-            var plainTextBytes = Convert.FromBase64String(base64EncodedString);
+            var plainTextBytes = base64EncodedString.Base64DecodeAsBytes();
             var plainText = Encoding.UTF8.GetString(plainTextBytes);
             return plainText;
+        }
+
+        public static byte[] Base64DecodeAsBytes(this string base64EncodedString)
+        {
+            return Convert.FromBase64String(base64EncodedString);
         }
 
         public static byte[] Zip(this string plainText)

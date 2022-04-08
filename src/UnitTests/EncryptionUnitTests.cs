@@ -1,5 +1,6 @@
 using NUnit.Framework;
 using Newtonsoft.Json;
+using UnitTests.TestModels;
 
 namespace UnitTests
 {
@@ -13,27 +14,32 @@ namespace UnitTests
         [Test]
         public void Test1()
         {
-            var person1 = new Data { Id = 1, Name = "Dhyey Patel" };
+            var data1 = new Data 
+            { 
+                Prop1 = "test1", 
+                Prop2 = "test2" 
+            };
             
-            var personCompress = person1.Compress();
+            var data2 = data1.JsonClone();
 
-            var person2 = personCompress.Uncompress<Data>();
+            var encrypted = data1.Encrypt();
+            var decrypted = encrypted.Decrypt<Data>();
+
+            var compressedPlus = data1.CompressPlus();
+            var uncompressedPlus = compressedPlus.UncompressPlus<Data>();
+
+            var compressed = data1.Compress();
+            var uncompressed = compressed.Uncompress<Data>();
+
+            var data = 13423245353;
+
+            var enc = data.Encrypt();
+            var dec = enc.Decrypt<long>();
 
 
-            var data = "This is sample data";
-
-            var dataCompress = data.Compress();
-
-            var data2 = dataCompress.Uncompress<string>();
-
-            Assert.Pass();
+            Assert.AreNotSame(data1, data2);
+            Assert.AreEqual(data1.Prop1, data2.Prop1);
+            Assert.AreEqual(data1.Prop2, data2.Prop2);
         }
-    }
-
-    public class Data
-    {
-        public int Id { get; set; }
-
-        public string Name { get; set; }
     }
 }
