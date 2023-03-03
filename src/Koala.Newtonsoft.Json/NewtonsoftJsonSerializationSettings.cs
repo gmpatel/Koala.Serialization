@@ -20,11 +20,12 @@ namespace Newtonsoft.Json
         {
             Converters = new Dictionary<string, JsonConverter> 
             {
-                { typeof(StringEnumConverter).Name, new StringEnumConverter { AllowIntegerValues = true } }
+                { nameof(StringEnumConverter), new StringEnumConverter { AllowIntegerValues = true } },
+                { nameof(SmartEnumConvertor), new SmartEnumConvertor() }
             };
         }
 
-        public static void RegistreJsonConverter(this JsonConverter converter)
+        public static void RegisterJsonConverter(this JsonConverter converter)
         {
             Converters[converter.GetType().Name] = converter;
             jsonIndentedSettings = null;
