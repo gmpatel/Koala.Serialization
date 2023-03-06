@@ -25,8 +25,8 @@ namespace UnitTests
             var encrypted = data1.Encrypt();
             var decrypted = encrypted.Decrypt<Data>();
 
-            var compressedPlus = data1.CompressPlus();
-            var uncompressedPlus = compressedPlus.UncompressPlus<Data>();
+            var compressedPlus = data1.Compress();
+            var uncompressedPlus = compressedPlus.Uncompress<Data>();
 
             var compressed = data1.Compress();
             var uncompressed = compressed.Uncompress<Data>();
