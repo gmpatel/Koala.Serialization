@@ -8,6 +8,19 @@ using System.Reflection;
 
 namespace Koala.Core
 {
+    public enum HttpClientMethods
+    {
+        GET,
+        HEAD,
+        POST,
+        PUT,
+        DELETE,
+        CONNECT,
+        OPTIONS,
+        TRACE,
+        PATCH,
+    }
+
     public enum AppBuilds
     {
         DEBUG,
@@ -320,5 +333,39 @@ namespace Koala.Core
         private static IEnumerable<string> HostNames { get; set; }
 
         private static string HostNamesString { get; set; }
+    }
+
+    public class ErrorResponse
+    {
+        public string Status { get; private set; }
+
+        public string Message { get; private set; }
+
+        public string Type { get; private set; }
+
+        public dynamic DataToken { get; private set; }
+
+        public dynamic DataTokens { get; private set; }
+
+        public string StackTrace { get; private set; }
+
+        public ErrorResponse(Exception exception, HttpStatusCode status = HttpStatusCode.InternalServerError, bool? stackTrace = default)
+        {
+            Status = $"{status} ({(int)status})";
+            Message = exception?.Message;
+            Type = $"{exception?.GetType().Name}";
+
+            var propertyDataToken = exception.GetType().GetProperty(nameof(DataToken));
+            this.DataToken = propertyDataToken?.GetValue(exception);
+
+            var propertyDataTokens = exception.GetType().GetProperty(nameof(DataTokens));
+            this.DataTokens = propertyDataTokens?.GetValue(exception);
+
+            StackTrace = StackTraceOverride ?? stackTrace ?? this.IsDebugMode()
+                ? exception?.ToString()
+                : null;
+        }
+
+        public static bool? StackTraceOverride { get; set; }
     }
 }
