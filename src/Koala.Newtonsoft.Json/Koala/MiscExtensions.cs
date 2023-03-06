@@ -73,7 +73,7 @@ namespace Koala.Core
                 .Any(da => da.IsJITTrackingEnabled);
         }
 
-        public static string GetEnvVarValue(this object input, string variableName = null)
+        public static string GetEnvVarValue(this object input, string variableName = default, string defaultVariableValue = default)
         {
             string variableValue;
 
@@ -83,7 +83,7 @@ namespace Koala.Core
                 {
                     if (string.IsNullOrEmpty(variableValue = Environment.GetEnvironmentVariable(variableName ?? input.ToString(), EnvironmentVariableTarget.Machine)))
                     {
-                        return null;
+                        return defaultVariableValue;
                     }
                 }
             }
