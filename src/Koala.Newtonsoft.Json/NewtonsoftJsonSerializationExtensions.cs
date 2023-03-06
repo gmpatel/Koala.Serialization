@@ -2,7 +2,6 @@
 using Newtonsoft.Json.Properties;
 using Newtonsoft.Json.Encryption;
 using Newtonsoft.Json.DataExtensions;
-using System.Text;
 
 namespace Newtonsoft.Json
 {
@@ -29,6 +28,18 @@ namespace Newtonsoft.Json
             serializerSettings.SerializationBinder = settings.SerializationBinder;
 
             return serializerSettings;
+        }
+
+        public static JsonSerializerSettings GetOrMergeDotNetFwNewtonsoftJsonNonIndentedSettings(this JsonSerializerSettings settings)
+        {
+            if (settings == null)
+            {
+                settings = NewtonsoftJsonSerializationSettings.ApplicationNewtonsoftJsonNonIndentedSettings;
+            }
+
+            settings.SerializationBinder = new CustomTypeConversionBinder();
+
+            return settings;
         }
 
         public static T JsonClone<T>(this T input, bool applySettings = true, bool? format = default)
@@ -80,35 +91,63 @@ namespace Newtonsoft.Json
                 ? default(T)
                 : (applySettings ?? true)
                     ? (dotNetCore ?? true)
-                        ? JsonConvert.DeserializeObject<T>(input, NewtonsoftJsonSerializationSettings.ApplicationNewtonsoftJsonSettings)
-                        : JsonConvert.DeserializeObject<T>(input, NewtonsoftJsonSerializationSettings.DotNetFwNewtonsoftJsonNonIndentedSettings)
+                        ? Get<T>(input, NewtonsoftJsonSerializationSettings.ApplicationNewtonsoftJsonSettings)
+                        : Get<T>(input, NewtonsoftJsonSerializationSettings.DotNetFwNewtonsoftJsonNonIndentedSettings)
+                    : Get<T>(input, settings: null);
+
+            return result;
+        }
+
+        public static T Get<T>(this string input, JsonSerializerSettings settings, bool? dotNetCore = default)
+        {
+            var result = (string.IsNullOrWhiteSpace(input))
+                ? default(T)
+                : (settings != null)
+                    ? (dotNetCore ?? true)
+                        ? JsonConvert.DeserializeObject<T>(input, settings)
+                        : JsonConvert.DeserializeObject<T>(input, settings.GetOrMergeDotNetFwNewtonsoftJsonNonIndentedSettings())
                     : JsonConvert.DeserializeObject<T>(input);
 
             return result;
         }
 
-        public static string Json<T>(this T input, bool applySettings = true, bool? format = default, bool? includeAllProperties = default)
+        public static string Json<T>(this T input, JsonSerializerSettings settings)
         {
-            var settings = (format ?? true)
-                ? (includeAllProperties ?? false)
-                    ? NewtonsoftJsonSerializationSettings.ApplicationNewtonsoftJsonIncludeAllPropertiesIndentedSettings
-                    : NewtonsoftJsonSerializationSettings.ApplicationNewtonsoftJsonSettings
-                : (includeAllProperties ?? false)
-                    ? NewtonsoftJsonSerializationSettings.ApplicationNewtonsoftJsonIncludeAllPropertiesNonIndentedSettings
-                    : NewtonsoftJsonSerializationSettings.ApplicationNewtonsoftJsonNonIndentedSettings;
-
-            var json = applySettings
+            var json = settings != null
                 ? JsonConvert.SerializeObject(input, settings)
                 : JsonConvert.SerializeObject(input);
 
             return json;
         }
 
-        public static string Compress<T>(this T input, bool applySettings = true)
+        public static string Json<T>(this T input, bool applySettings = true, bool? format = default, bool? includeAllProperties = default, bool? compact = default, bool? custom = default)
         {
-            var jsonString = input.Json(applySettings);
+            var settings = (custom ?? false)
+                ? NewtonsoftJsonSerializationSettings.ApplicationNewtonsoftCustomSettings
+                : applySettings
+                    ? (format ?? true)
+                        ? (includeAllProperties ?? false)
+                            ? NewtonsoftJsonSerializationSettings.ApplicationNewtonsoftJsonIncludeAllPropertiesIndentedSettings
+                            : (compact ?? false)
+                                ? NewtonsoftJsonSerializationSettings.ApplicationNewtonsoftCompactIndentedJsonSettings
+                                : NewtonsoftJsonSerializationSettings.ApplicationNewtonsoftJsonSettings
+                        : (includeAllProperties ?? false)
+                            ? NewtonsoftJsonSerializationSettings.ApplicationNewtonsoftJsonIncludeAllPropertiesNonIndentedSettings
+                            : (compact ?? false)
+                                ? NewtonsoftJsonSerializationSettings.ApplicationNewtonsoftCompactJsonSettings
+                                : NewtonsoftJsonSerializationSettings.ApplicationNewtonsoftJsonNonIndentedSettings
+                    : null;
+
+            var json = input.Json(settings);
+
+            return json;
+        }
+
+        public static string Compress<T>(this T input, bool applySettings = true, bool? format = false)
+        {
+            var jsonString = input.Json(applySettings, format);
             var jsonStringZippedBytes = jsonString.Zip();
-            var jsonStringZippedBytesBase64String = jsonStringZippedBytes.Base64Encode();
+            var jsonStringZippedBytesBase64String = Convert.ToBase64String(jsonStringZippedBytes);
             return jsonStringZippedBytesBase64String;
         }
 
@@ -127,40 +166,22 @@ namespace Newtonsoft.Json
 
         public static T Uncompress<T>(this string input, bool? applySettings = default, bool? dotNetCore = default)
         {
-            var jsonStringZippedBytesBack = input.Base64DecodeAsBytes();
+            var jsonStringZippedBytesBack = Convert.FromBase64String(input);
             var jsonStringBack = jsonStringZippedBytesBack.Unzip();
             var output = jsonStringBack.Get<T>(applySettings, dotNetCore);
             return output;
         }
-        
-        public static string Encrypt<T>(this T input, bool applySettings = true)
-        {
-            var jsonString = input.Json(applySettings);
-            var encryptedBytes = Cryptography.Encrypt(jsonString);
-            return encryptedBytes.Base64Encode();
-        }
 
-        public static T Decrypt<T>(this string input, bool? applySettings = default, bool? dotNetCore = default)
+        public static byte[] Encrypt<T>(this T input, bool applySettings = true, bool? format = false)
         {
-            var encryptedBytes = input.Base64DecodeAsBytes();
-            var decryptedBytes = Cryptography.Decrypt(encryptedBytes);
-            var jsonStringBack = Encoding.ASCII.GetString(decryptedBytes);
-            var output = jsonStringBack.Get<T>(applySettings, dotNetCore);
-            return output;
-        }
-
-        public static string CompressPlus<T>(this T input, bool applySettings = true)
-        {
-            var jsonString = input.Json(applySettings);
+            var jsonString = input.Json(applySettings, format);
             var jsonStringZippedBytes = jsonString.Zip();
-            var encryptedBytes = Cryptography.Encrypt(jsonStringZippedBytes);
-            return encryptedBytes.Base64Encode();
+            return Cryptography.Encrypt(jsonStringZippedBytes);
         }
 
-        public static T UncompressPlus<T>(this string input, bool? applySettings = default, bool? dotNetCore = default)
+        public static T Decrypt<T>(this byte[] input, bool? applySettings = default, bool? dotNetCore = default)
         {
-            var encryptedBytes = input.Base64DecodeAsBytes();
-            var decryptedBytes = Cryptography.Decrypt(encryptedBytes);
+            var decryptedBytes = input.Decrypt();
             var jsonStringBack = decryptedBytes.Unzip();
             var output = jsonStringBack.Get<T>(applySettings, dotNetCore);
             return output;

@@ -3,57 +3,77 @@ using Newtonsoft.Json.Converters;
 using System.Collections.Generic;
 using Newtonsoft.Json.Serialization;
 using System.Linq;
+using UnitsNet.Serialization.JsonNet;
 
 namespace Newtonsoft.Json
 {
     public static class NewtonsoftJsonSerializationSettings
     {
-        public static readonly IDictionary<string, JsonConverter> Converters;
-
-        private static JsonSerializerSettings jsonDotNetFwNotIndentedSettings { get; set; }
-        private static JsonSerializerSettings jsonIndentedSettings { get; set; }
-        private static JsonSerializerSettings jsonNotIndentedSettings { get; set; }
-        private static JsonSerializerSettings jsonIncludeAllPropertiesNonIndentedSettings { get; set; }
-        private static JsonSerializerSettings jsonIncludeAllPropertiesIndentedSettings { get; set; }
-
-        static NewtonsoftJsonSerializationSettings()
-        {
-            Converters = new Dictionary<string, JsonConverter> 
-            {
-                { nameof(StringEnumConverter), new StringEnumConverter { AllowIntegerValues = true } },
-                { nameof(SmartEnumConvertor), new SmartEnumConvertor() }
-            };
-        }
-
-        public static void RegisterJsonConverter(this JsonConverter converter)
-        {
-            Converters[converter.GetType().Name] = converter;
-            jsonIndentedSettings = null;
-        }
+        private static JsonSerializerSettings jsonApplicationSettings { get; set; }
 
         public static JsonSerializerSettings ApplicationNewtonsoftJsonSettings
         {
             get
             {
-                if (jsonIndentedSettings == null)
+                if (jsonApplicationSettings == null)
                 {
-                    jsonIndentedSettings = new JsonSerializerSettings
+                    jsonApplicationSettings = new JsonSerializerSettings
                     {
                         ContractResolver = new CamelCaseExceptDictionaryKeysResolver(),
-                        Converters = Converters.Select(x => x.Value).ToList(),
+                        Converters = new List<JsonConverter>
+                        {
+                            new StringEnumConverter { AllowIntegerValues = true },
+                            new UnitsNetIQuantityJsonConverter(),
+                            new SmartEnumConvertor(), // new SmartEnumDictionaryConvertor()
+                        },
                         NullValueHandling = NullValueHandling.Ignore,
                         DefaultValueHandling = DefaultValueHandling.Ignore,
                         ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
                         Formatting = Formatting.Indented,
                         DateFormatHandling = DateFormatHandling.IsoDateFormat,
                         ConstructorHandling = ConstructorHandling.Default,
-                        TypeNameHandling = TypeNameHandling.Auto          
+                        TypeNameHandling = TypeNameHandling.Auto
                     };
                 }
 
-                return jsonIndentedSettings;
+                return jsonApplicationSettings;
             }
         }
+
+        private static JsonSerializerSettings jsonCompactIndentedSettings { get; set; }
+
+        public static JsonSerializerSettings ApplicationNewtonsoftCompactIndentedJsonSettings
+        {
+            get
+            {
+                if (jsonCompactIndentedSettings == null)
+                {
+                    jsonCompactIndentedSettings = ApplicationNewtonsoftJsonSettings.JsonClone();
+                    jsonCompactIndentedSettings.TypeNameHandling = TypeNameHandling.None;
+                }
+
+                return jsonCompactIndentedSettings;
+            }
+        }
+
+        private static JsonSerializerSettings jsonCompactSettings { get; set; }
+
+        public static JsonSerializerSettings ApplicationNewtonsoftCompactJsonSettings
+        {
+            get
+            {
+                if (jsonCompactSettings == null)
+                {
+                    jsonCompactSettings = ApplicationNewtonsoftJsonSettings.JsonClone();
+                    jsonCompactSettings.TypeNameHandling = TypeNameHandling.None;
+                    jsonCompactSettings.Formatting = Formatting.None;
+                }
+
+                return jsonCompactSettings;
+            }
+        }
+
+        private static JsonSerializerSettings jsonNotIndentedSettings { get; set; }
 
         public static JsonSerializerSettings ApplicationNewtonsoftJsonNonIndentedSettings
         {
@@ -61,7 +81,7 @@ namespace Newtonsoft.Json
             {
                 if (jsonNotIndentedSettings == null)
                 {
-                    jsonNotIndentedSettings = ApplicationNewtonsoftJsonSettings;
+                    jsonNotIndentedSettings = ApplicationNewtonsoftJsonSettings.JsonClone();
                     jsonNotIndentedSettings.Formatting = Formatting.None;
                 }
 
@@ -69,13 +89,15 @@ namespace Newtonsoft.Json
             }
         }
 
+        private static JsonSerializerSettings jsonIncludeAllPropertiesNonIndentedSettings { get; set; }
+
         public static JsonSerializerSettings ApplicationNewtonsoftJsonIncludeAllPropertiesNonIndentedSettings
         {
             get
             {
                 if (jsonIncludeAllPropertiesNonIndentedSettings == null)
                 {
-                    jsonIncludeAllPropertiesNonIndentedSettings = ApplicationNewtonsoftJsonSettings;
+                    jsonIncludeAllPropertiesNonIndentedSettings = ApplicationNewtonsoftJsonSettings.JsonClone();
                     jsonIncludeAllPropertiesNonIndentedSettings.Formatting = Formatting.None;
                     jsonIncludeAllPropertiesNonIndentedSettings.NullValueHandling = NullValueHandling.Include;
                     jsonIncludeAllPropertiesNonIndentedSettings.DefaultValueHandling = DefaultValueHandling.Include;
@@ -85,14 +107,15 @@ namespace Newtonsoft.Json
             }
         }
 
+        private static JsonSerializerSettings jsonIncludeAllPropertiesIndentedSettings { get; set; }
+
         public static JsonSerializerSettings ApplicationNewtonsoftJsonIncludeAllPropertiesIndentedSettings
         {
             get
             {
                 if (jsonIncludeAllPropertiesIndentedSettings == null)
                 {
-                    jsonIncludeAllPropertiesIndentedSettings = ApplicationNewtonsoftJsonSettings;
-                    jsonIncludeAllPropertiesIndentedSettings.Formatting = Formatting.Indented;
+                    jsonIncludeAllPropertiesIndentedSettings = ApplicationNewtonsoftJsonSettings.JsonClone();
                     jsonIncludeAllPropertiesIndentedSettings.NullValueHandling = NullValueHandling.Include;
                     jsonIncludeAllPropertiesIndentedSettings.DefaultValueHandling = DefaultValueHandling.Include;
                 }
@@ -101,17 +124,39 @@ namespace Newtonsoft.Json
             }
         }
 
+        private static JsonSerializerSettings jsonDotNetFwNotIndentedSettings { get; set; }
+
         public static JsonSerializerSettings DotNetFwNewtonsoftJsonNonIndentedSettings
         {
             get
             {
                 if (jsonDotNetFwNotIndentedSettings == null)
                 {
-                    jsonDotNetFwNotIndentedSettings = ApplicationNewtonsoftJsonNonIndentedSettings;
+                    jsonDotNetFwNotIndentedSettings = ApplicationNewtonsoftJsonSettings.JsonClone();
+                    jsonDotNetFwNotIndentedSettings.Formatting = Formatting.None;
                     jsonDotNetFwNotIndentedSettings.SerializationBinder = new CustomTypeConversionBinder();
                 }
 
                 return jsonDotNetFwNotIndentedSettings;
+            }
+        }
+
+        private static JsonSerializerSettings jsonCustomSettings { get; set; }
+
+        public static JsonSerializerSettings ApplicationNewtonsoftCustomSettings
+        {
+            get
+            {
+                if (jsonCustomSettings == null)
+                {
+                    jsonCustomSettings = ApplicationNewtonsoftJsonSettings.JsonClone();
+                }
+
+                return jsonCustomSettings;
+            }
+            set
+            {
+                jsonCustomSettings = value;
             }
         }
     }
