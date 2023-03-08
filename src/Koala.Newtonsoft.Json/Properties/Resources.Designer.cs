@@ -81,6 +81,42 @@ namespace Newtonsoft.Json.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to {NewLine}[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}Properties: {Properties}{NewLine}{Exception}.
+        /// </summary>
+        internal static string LogConsoleLogsOutputTemplate {
+            get {
+                return ResourceManager.GetString("LogConsoleLogsOutputTemplate", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {NewLine}[{Timestamp:HH:mm:ss} {Level:u3}] {EscapedMessage} Properties: {Properties} {EscapedException}.
+        /// </summary>
+        internal static string LogConsoleLogsOutputTemplateEnricher {
+            get {
+                return ResourceManager.GetString("LogConsoleLogsOutputTemplateEnricher", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {NewLine}[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}Properties: {Properties}{NewLine}{Exception}.
+        /// </summary>
+        internal static string LogDebugLogsOutputTemplate {
+            get {
+                return ResourceManager.GetString("LogDebugLogsOutputTemplate", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {NewLine}[{Timestamp:HH:mm:ss} {Level:u3}] {EscapedMessage} Properties: {Properties} {EscapedException}.
+        /// </summary>
+        internal static string LogDebugLogsOutputTemplateEnricher {
+            get {
+                return ResourceManager.GetString("LogDebugLogsOutputTemplateEnricher", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to {}.
         /// </summary>
         internal static string StringValueAsEmptyJson {

@@ -1,10 +1,23 @@
-﻿using System;
+﻿using Serilog.Core;
+using Serilog.Events;
+using Serilog.Sinks.SystemConsole.Themes;
+using Serilog;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Reflection;
+using System.Runtime.InteropServices;
+using System.Collections;
+using System.Text.RegularExpressions;
+using Microsoft.Extensions.Configuration;
+using Newtonsoft.Json.Properties;
+using Serilog.ThrowContext;
+using Serilog.Formatting.Json;
+using Serilog.Formatting;
 
 namespace Koala.Core
 {
@@ -50,6 +63,125 @@ namespace Koala.Core
             //     return false;
             // #endif
         }
+        public static T ToEnum<T>(this string value, T defaultValue) where T : struct
+        {
+            return string.IsNullOrWhiteSpace(value) || !Enum.TryParse(value.Trim(), true, out T result)
+                ? defaultValue
+                : result;
+        }
+
+        public static string Short(this Guid guid)
+        {
+            return guid.ShortGuid().Replace("=", string.Empty).Trim();
+        }
+
+        public static string ShortGuid(this Guid guid)
+        {
+            return Convert.ToBase64String(guid.ToByteArray());
+        }
+
+        public static bool IsHttpUrl(this Uri url)
+        {
+            return (url == null ? string.Empty : url.ToString()).IsHttpUrl();
+        }
+        
+        public static bool IsHttpUrl(this string url)
+        {
+            if (!string.IsNullOrWhiteSpace(url) && (url.Trim().StartsWith("http://", StringComparison.InvariantCultureIgnoreCase) || url.Trim().StartsWith("https://", StringComparison.InvariantCultureIgnoreCase)))
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        public static string GetFileExtensionFromS3Url(this string fileUrl, bool includeDot = false)
+        {
+            if (fileUrl.IsHttpUrl())
+            {
+                var ext = fileUrl.Split('?')[0];
+                ext = ext.Split('/').Last();
+                ext = ext.Contains('.') ? ext.Substring(ext.LastIndexOf('.')).Trim().ToLower() : string.Empty;
+                return includeDot ? ext : ext.Replace(".", string.Empty);
+            }
+            else
+            {
+                var ext = Path.GetExtension(fileUrl).Trim().ToLower();
+                return includeDot ? ext : ext.Replace(".", string.Empty);
+            }
+        }
+        
+        public static Logger GetLogger(this object input, IConfiguration configuration)
+        {
+            return input.GetLogger(configuration, out var loggingLevelSwitch, out var loggerConfiguration);
+        }
+
+        public static Logger GetLogger(this object input, IConfiguration configuration, out LoggingLevelSwitch loggingLevelSwitch)
+        {
+            return input.GetLogger(configuration, out loggingLevelSwitch, out var loggerConfiguration);
+        }
+
+        public static Logger GetLogger(this object input, IConfiguration configuration, out LoggingLevelSwitch loggingLevelSwitch, out LoggerConfiguration loggerConfiguration)
+        {
+            var path = "logs.json".GetStorageFile("logs", false).DirectoryName ?? "/tmp/logs";
+            var jsonFormatter = new JsonFormatter(renderMessage: true);
+            
+            loggingLevelSwitch = input.GetDefaultLoggingLevelSwitch();
+
+            loggerConfiguration = new LoggerConfiguration()
+                .MinimumLevel.ControlledBy(loggingLevelSwitch)
+                .MinimumLevel.Override("Microsoft.AspNetCore", LogEventLevel.Warning)
+                .MinimumLevel.Override("Microsoft.Extensions.Http.DefaultHttpClientFactory", LogEventLevel.Warning)
+                .MinimumLevel.Override("System", LogEventLevel.Warning)
+                .Enrich.With<ThrowContextEnricher>()
+                .Enrich.With(new ExceptionEnricher())
+                .Enrich.With(new MessageEnricher())
+                .Enrich.FromLogContext()
+                .WriteTo.Console(outputTemplate: Resources.LogConsoleLogsOutputTemplateEnricher, theme: AnsiConsoleTheme.Literate)
+                .WriteTo.File(
+                    jsonFormatter, 
+                    path, 
+                    rollingInterval: RollingInterval.Hour, 
+                    rollOnFileSizeLimit: true,
+                    fileSizeLimitBytes: 123456,
+                    shared: true
+                );
+
+            if (configuration != null)
+            {
+                loggerConfiguration = loggerConfiguration.ReadFrom.Configuration(configuration);
+            }
+                
+            var logger = loggerConfiguration.CreateLogger();
+
+            Log.Logger = logger;
+
+            return logger;
+        }
+
+        public static LoggingLevelSwitch GetDefaultLoggingLevelSwitch(this object input)
+        {
+            return new LoggingLevelSwitch
+            {
+                MinimumLevel = "LOG_EVENT_LEVEL".GetEnvVarValue().ToEnum<LogEventLevel>(input.IsDebugMode() ? LogEventLevel.Debug : LogEventLevel.Information)
+            };
+        }
+
+        public static bool IsFileUrlOfType(this string fileUrl, out string fileExtension, params string[] extensions)
+        {
+            var fileExtensionInt = fileUrl.GetFileExtensionFromS3Url();
+            fileExtension = fileExtensionInt;
+            return extensions.Any(x => x.Trim().ToLower().Equals(string.IsNullOrWhiteSpace(fileExtensionInt) ? string.Empty : $".{fileExtensionInt}"));
+        }
+
+        public static bool IsWindows(this object input) =>
+            RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
+
+        public static bool IsMacOS(this object input) =>
+            RuntimeInformation.IsOSPlatform(OSPlatform.OSX);
+
+        public static bool IsLinux(this object input) =>
+            RuntimeInformation.IsOSPlatform(OSPlatform.Linux);
 
         public static string CompileModeLabel(this object input, Assembly assembly = null)
         {
@@ -367,5 +499,53 @@ namespace Koala.Core
         }
 
         public static bool? StackTraceOverride { get; set; }
+    }
+
+    public class ExceptionEnricher : ILogEventEnricher
+    {
+        public void Enrich(LogEvent logEvent, ILogEventPropertyFactory propertyFactory)
+        {
+            if (logEvent?.Exception == null)
+                return;
+
+            var escapedException = Regex.Replace(logEvent.Exception.ToString(), Environment.NewLine, "[BR]");
+            escapedException = Regex.Replace(escapedException, "\r\n", "[BR]");
+            escapedException = Regex.Replace(escapedException, "\n", "[BR]");
+            escapedException = Regex.Replace(escapedException, "\r", "[BR]");
+
+            var logEventProperty = propertyFactory.CreateProperty("EscapedException", escapedException);
+            logEvent.AddPropertyIfAbsent(logEventProperty);
+
+            if (logEvent.Exception.Data.Count == 0)
+            {
+                return;
+            }
+
+            var dataDictionary = logEvent.Exception.Data
+                .Cast<DictionaryEntry>()
+                .Where(e => e.Key is string)
+                .ToDictionary(e => (string)e.Key, e => e.Value);
+
+            var property = propertyFactory.CreateProperty("ExceptionData", dataDictionary, destructureObjects: true);
+
+            logEvent.AddPropertyIfAbsent(property);
+        }
+    }
+
+    public class MessageEnricher : ILogEventEnricher
+    {
+        public void Enrich(LogEvent logEvent, ILogEventPropertyFactory propertyFactory)
+        {
+            if (logEvent.MessageTemplate == null)
+                return;
+
+            var escapedMessage = Regex.Replace(logEvent.MessageTemplate.ToString(), Environment.NewLine, "[BR]");
+            escapedMessage = Regex.Replace(escapedMessage, "\r\n", "[BR]");
+            escapedMessage = Regex.Replace(escapedMessage, "\n", "[BR]");
+            escapedMessage = Regex.Replace(escapedMessage, "\r", "[BR]");
+
+            var logEventProperty = propertyFactory.CreateProperty("EscapedMessage", escapedMessage);
+            logEvent.AddPropertyIfAbsent(logEventProperty);
+        }
     }
 }

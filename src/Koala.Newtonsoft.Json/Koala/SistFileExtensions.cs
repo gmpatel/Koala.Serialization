@@ -6,21 +6,86 @@ namespace Koala.Core
 {
     public static class SistFileExtensions
     {
-        public static T GetFromFile<T>(this string fileName, Func<T> defaultObjectProvider, string overrideStorageDirectoryName = default) where T : class
+        public static Stream GetFromFile(this string fileName, Func<Stream> defaultProvider, string storageDirectoryRelativePath = default, bool? forceOverwrite = default, bool? useDefaultDirectory = default)
         {
-            var storageDirectoryInfo = string.IsNullOrWhiteSpace(overrideStorageDirectoryName)
-                ? fileName.GetDumpDirectory()
-                : Directory.CreateDirectory(overrideStorageDirectoryName);
+            var fileInfo = fileName.GetStorageFile(storageDirectoryRelativePath, useDefaultDirectory);
+            var filePath = fileInfo.FullName;
 
-            var sampleJsonFilePath = Path.Combine(storageDirectoryInfo.FullName, fileName);
+            if (!File.Exists(filePath) || (forceOverwrite ?? false))
+            {
+                lock (GetFileStreamLock)
+                {
+                    if (!File.Exists(filePath) || (forceOverwrite ?? false))
+                    {
+                        var dataStream = defaultProvider();
 
-            if (!File.Exists(sampleJsonFilePath))
+                        var ms = new MemoryStream();
+                        dataStream.CopyTo(dataStream);
+                        var data = ms.ToArray();
+
+                        File.WriteAllBytes(filePath, data);
+                    }
+                }
+            }
+
+            var dataBytes = File.ReadAllBytes(filePath);
+            return new MemoryStream(dataBytes);
+        }
+
+        public static string GetFromFile(this string fileName, Func<string> defaultProvider, string storageDirectoryRelativePath = default, bool? forceOverwrite = default, bool? useDefaultDirectory = default)
+        {
+            var fileInfo = fileName.GetStorageFile(storageDirectoryRelativePath, useDefaultDirectory);
+            var filePath = fileInfo.FullName;
+
+            if (!File.Exists(filePath) || (forceOverwrite ?? false))
+            {
+                lock (GetFileStringLock)
+                {
+                    if (!File.Exists(filePath) || (forceOverwrite ?? false))
+                    {
+                        var data = defaultProvider();
+                        File.WriteAllText(filePath, data);
+                        return data;
+                    }
+                }
+            }
+
+            return File.ReadAllText(filePath);
+        }
+
+        public static byte[] GetFromFile(this string fileName, Func<byte[]> defaultProvider, string storageDirectoryRelativePath = default, bool? forceOverwrite = default, bool? useDefaultDirectory = default)
+        {
+            var fileInfo = fileName.GetStorageFile(storageDirectoryRelativePath, useDefaultDirectory);
+            var filePath = fileInfo.FullName;
+
+            if (!File.Exists(filePath) || (forceOverwrite ?? false))
+            {
+                lock (GetFileBinaryLock)
+                {
+                    if (!File.Exists(filePath) || (forceOverwrite ?? false))
+                    {
+                        var data = defaultProvider();
+                        File.WriteAllBytes(filePath, data);
+                        return data;
+                    }
+                }
+            }
+
+            return File.ReadAllBytes(filePath);
+        }
+
+        public static T GetFromFile<T>(this string fileName, Func<T> defaultProvider, string storageDirectoryRelativePath = default, bool? forceOverwrite = default, bool? useDefaultDirectory = default) where T : class
+        {
+            var sampleJsonFileInfo = fileName.GetStorageFile(storageDirectoryRelativePath, useDefaultDirectory);
+            var sampleJsonFilePath = sampleJsonFileInfo.FullName;
+
+            if (!File.Exists(sampleJsonFilePath) || (forceOverwrite ?? false))
             {
                 lock (GetFromFileLock)
                 {
-                    if (!File.Exists(sampleJsonFilePath))
+                    if (!File.Exists(sampleJsonFilePath) || (forceOverwrite ?? false))
                     {
-                        var sample = defaultObjectProvider();
+                        var sample = defaultProvider();
                         File.WriteAllText(sampleJsonFilePath, sample.Json(format: true));
                         return sample;
                     }
@@ -39,29 +104,64 @@ namespace Koala.Core
             }
         }
 
-        public static DirectoryInfo GetDumpDirectory(this object input, Guid? appId = default)
+        public static FileInfo GetStorageFile(this string fileName, string storageDirectoryRelativePath = default, bool? useDefaultDirectory = default)
+        {
+            var storageDirectoryInfo = storageDirectoryRelativePath.GetStorageDirectory(useDefaultDirectory);
+            var storageFileInfo = Path.Combine(storageDirectoryInfo.FullName, fileName);
+            return new FileInfo(storageFileInfo);
+        }
+
+        public static DirectoryInfo GetStorageDirectory(this string storageDirectoryRelativePath, bool? useDefaultDirectory = default)
         {
             var rootDirectoryInfo = new DirectoryInfo("/tmp");
+            var defaultDirectoryName = "default";
 
             if (!rootDirectoryInfo.Exists)
             {
                 Directory.CreateDirectory(rootDirectoryInfo.FullName);
             }
 
-            var dumpDirectoryName = appId != default ? $"dump-{appId.ToString().ToLower()}" : $"dump-{DynamicAppId.ToString().ToLower()}";
-
-            var dumpDirectoryInfo = new DirectoryInfo(Path.Combine(rootDirectoryInfo.FullName, dumpDirectoryName));
-
-            if (!dumpDirectoryInfo.Exists)
+            if (!string.IsNullOrWhiteSpace(storageDirectoryRelativePath))
             {
-                Directory.CreateDirectory(dumpDirectoryInfo.FullName);
+                storageDirectoryRelativePath = storageDirectoryRelativePath.Trim();
+
+                storageDirectoryRelativePath = storageDirectoryRelativePath.StartsWith(@"/") || storageDirectoryRelativePath.StartsWith(@"\")
+                    ? storageDirectoryRelativePath.Substring(1)
+                    : storageDirectoryRelativePath;
+
+                storageDirectoryRelativePath = storageDirectoryRelativePath.Replace(@"\", @"/");
             }
 
-            return dumpDirectoryInfo;
+
+            var storageDirectoryInfo =
+                string.IsNullOrWhiteSpace(KoalaGlobals.AppIdentifier)
+                    ? string.IsNullOrWhiteSpace(storageDirectoryRelativePath)
+                        ? (useDefaultDirectory ?? true)
+                            ? new DirectoryInfo(Path.Combine(rootDirectoryInfo.FullName, defaultDirectoryName))
+                            : rootDirectoryInfo
+                        : (useDefaultDirectory ?? true)
+                            ? new DirectoryInfo(Path.Combine(rootDirectoryInfo.FullName, defaultDirectoryName, storageDirectoryRelativePath))
+                            : new DirectoryInfo(Path.Combine(rootDirectoryInfo.FullName, storageDirectoryRelativePath))
+                    : string.IsNullOrWhiteSpace(storageDirectoryRelativePath)
+                        ? (useDefaultDirectory ?? true)
+                            ? new DirectoryInfo(Path.Combine(rootDirectoryInfo.FullName, KoalaGlobals.AppIdentifier.Trim(), defaultDirectoryName))
+                            : new DirectoryInfo(Path.Combine(rootDirectoryInfo.FullName, KoalaGlobals.AppIdentifier.Trim()))
+                        : (useDefaultDirectory ?? true)
+                            ? new DirectoryInfo(Path.Combine(rootDirectoryInfo.FullName, KoalaGlobals.AppIdentifier.Trim(), defaultDirectoryName, storageDirectoryRelativePath))
+                            : new DirectoryInfo(Path.Combine(rootDirectoryInfo.FullName, KoalaGlobals.AppIdentifier.Trim(), storageDirectoryRelativePath))
+                ;
+
+            if (!storageDirectoryInfo.Exists)
+            {
+                Directory.CreateDirectory(storageDirectoryInfo.FullName);
+            }
+
+            return storageDirectoryInfo;
         }
 
         private static readonly object GetFromFileLock = new object();
-
-        private static readonly Guid DynamicAppId = Guid.NewGuid();
+        private static readonly object GetFileBinaryLock = new object();
+        private static readonly object GetFileStringLock = new object();
+        private static readonly object GetFileStreamLock = new object();
     }
 }

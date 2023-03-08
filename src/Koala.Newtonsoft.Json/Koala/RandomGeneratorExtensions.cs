@@ -18,8 +18,8 @@ namespace Koala.Core
                 : prependValue ?? true ? $"{value.Trim()}{separate ?? ":"}" : $"{separate ?? ":"}{value.Trim()}";
 
             return (prependValue ?? true)
-                ? $"{ append }{ Guid.NewGuid().ToString().Replace("-", string.Empty) }"
-                : $"{ Guid.NewGuid().ToString().Replace("-", string.Empty) }{ append }"
+                ? $"{append}{Guid.NewGuid().ToString().Replace("-", string.Empty)}"
+                : $"{Guid.NewGuid().ToString().Replace("-", string.Empty)}{append}"
                     .ToLower()
                     .Trim();
         }
@@ -36,8 +36,8 @@ namespace Koala.Core
                 : prependValue ?? true ? $"{value.Trim()}{separate ?? ":"}" : $"{separate ?? ":"}{value.Trim()}";
 
             return (prependValue ?? true)
-                ? $"{ append }{ append.GenerateRandom() }"
-                : $"{ append.GenerateRandom() }{ append }"
+                ? $"{append}{append.GenerateRandom()}"
+                : $"{append.GenerateRandom()}{append}"
                     .ToLower()
                     .Trim();
         }
@@ -86,6 +86,43 @@ namespace Koala.Core
             }
 
             return new string(stringChars);
+        }
+
+        public static string NormalizeStringSpaces(this string input, bool? replaceSlashN = default, bool? replaceSlashR = default)
+        {
+            if (string.IsNullOrWhiteSpace(input))
+            {
+                return input;
+            }
+
+            var trimmedInput = input.Trim();
+
+            if (replaceSlashN ?? true) trimmedInput = trimmedInput.Replace("\n", "");
+            if (replaceSlashR ?? true) trimmedInput = trimmedInput.Replace("\r", "");
+
+            var currSpaceString = string.Empty;
+            var processedInput = string.Empty;
+
+            foreach (char c in trimmedInput)
+            {
+                if (c != ' ')
+                {
+                    if (currSpaceString.Length > 0)
+                    {
+                        processedInput = $"{processedInput}{" "}";
+                        currSpaceString = string.Empty;
+                    }
+
+                    processedInput = $"{processedInput}{c}";
+                }
+
+                if (c == ' ')
+                {
+                    currSpaceString = $"{currSpaceString}{c}";
+                }
+            }
+
+            return processedInput;
         }
 
         private const string DateTimeStringFormat = "yyMMddHHmmssfff";

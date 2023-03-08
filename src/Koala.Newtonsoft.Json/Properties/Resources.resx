@@ -124,6 +124,18 @@
   <data name="abrak" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\abrak.aagm;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
+  <data name="LogConsoleLogsOutputTemplate" xml:space="preserve">
+    <value>{NewLine}[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}Properties: {Properties}{NewLine}{Exception}</value>
+  </data>
+  <data name="LogConsoleLogsOutputTemplateEnricher" xml:space="preserve">
+    <value>{NewLine}[{Timestamp:HH:mm:ss} {Level:u3}] {EscapedMessage} Properties: {Properties} {EscapedException}</value>
+  </data>
+  <data name="LogDebugLogsOutputTemplate" xml:space="preserve">
+    <value>{NewLine}[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}Properties: {Properties}{NewLine}{Exception}</value>
+  </data>
+  <data name="LogDebugLogsOutputTemplateEnricher" xml:space="preserve">
+    <value>{NewLine}[{Timestamp:HH:mm:ss} {Level:u3}] {EscapedMessage} Properties: {Properties} {EscapedException}</value>
+  </data>
   <data name="StringValueAsEmptyJson" xml:space="preserve">
     <value>{}</value>
   </data>
