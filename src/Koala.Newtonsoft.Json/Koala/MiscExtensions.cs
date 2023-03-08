@@ -123,7 +123,7 @@ namespace Koala.Core
 
         public static Logger GetLogger(this object input, IConfiguration configuration, out LoggingLevelSwitch loggingLevelSwitch, out LoggerConfiguration loggerConfiguration)
         {
-            var path = "logs.json".GetStorageFile("logs", false).DirectoryName ?? "/tmp/logs";
+            var path = "logs-.log".GetStorageFile("app-logs", false).DirectoryName ?? "/tmp/app-logs/logs-.log";
             var jsonFormatter = new JsonFormatter(renderMessage: true);
             
             loggingLevelSwitch = input.GetDefaultLoggingLevelSwitch();
@@ -139,7 +139,6 @@ namespace Koala.Core
                 .Enrich.FromLogContext()
                 .WriteTo.Console(outputTemplate: Resources.LogConsoleLogsOutputTemplateEnricher, theme: AnsiConsoleTheme.Literate)
                 .WriteTo.File(
-                    jsonFormatter, 
                     path, 
                     rollingInterval: RollingInterval.Hour, 
                     rollOnFileSizeLimit: true,
