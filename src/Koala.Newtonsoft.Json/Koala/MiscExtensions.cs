@@ -123,7 +123,7 @@ namespace Koala.Core
 
         public static Logger GetLogger(this object input, IConfiguration configuration, out LoggingLevelSwitch loggingLevelSwitch, out LoggerConfiguration loggerConfiguration)
         {
-            var path = "logs-.log".GetStorageFile("app-logs", false).DirectoryName ?? "/tmp/app-logs/logs-.log";
+            var path = "logs-.log".GetStorageFile("serilog", false).FullName;
             var jsonFormatter = new JsonFormatter(renderMessage: true);
             
             loggingLevelSwitch = input.GetDefaultLoggingLevelSwitch();
