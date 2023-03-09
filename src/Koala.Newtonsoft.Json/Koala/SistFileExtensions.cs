@@ -113,7 +113,7 @@ namespace Koala.Core
 
         public static DirectoryInfo GetStorageDirectory(this string storageDirectoryRelativePath, bool? useDefaultDirectory = default)
         {
-            var rootDirectoryInfo = new DirectoryInfo("/tmp");
+            var rootDirectoryInfo = new DirectoryInfo(string.IsNullOrWhiteSpace(KoalaGlobals.AppFilesRoot) ? "/tmp" : KoalaGlobals.AppFilesRoot.Trim());
             var defaultDirectoryName = "default";
 
             if (!rootDirectoryInfo.Exists)
